@@ -27,7 +27,7 @@ local player = {
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/silencedevs/SilenceScripts/refs/heads/main/libraries/windui/windui.luau"))()
 
 local silence = WindUI:CreateWindow({
-    Title = "Nova Hub X- Tap Simulator",
+    Title = "Nova Hub  - Tap Simulator",
     Author = "by Henne @imhenne",
     Icon = "solar:moon-bold",
     IconSize = 13*2,
@@ -37,7 +37,7 @@ local silence = WindUI:CreateWindow({
     Size = UDim2.fromOffset(450, 450),
 
     OpenButton = {
-        Title = " Nova Hub X",
+        Title = " Nova Hub ",
         CornerRadius = UDim.new(1, 0),
         StrokeThickness = 3,
         Enabled = true,
@@ -2124,12 +2124,12 @@ local elements = {
         }),
         tabs.info:Button({
             Title = "Copy Discord Invite",
-            Desc = "dsc.gg/novahubx",
+            Desc = "dsc.gg/NovaHub",
             Icon = "lucide:clipboard",
             Callback = function()
                 setclipboard("https://discord.gg/WtvNBGkEUj")
                 WindUI:Notify({
-                    Title = "Nova Hub X",
+                    Title = "Nova Hub ",
                     Content = "Invite Copied to Clipboard!"
                 })
             end
@@ -2149,6 +2149,6 @@ local elements = {
 }
 
 WindUI:Notify({
-    Title = "Nova Hub X V3",
+    Title = "Nova Hub  V3",
     Content = "Script loaded completely"
 })
