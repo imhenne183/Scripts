@@ -1,0 +1,969 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+
+local Player = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local WindUI = loadstring(game:HttpGet(
+    "https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"
+))()
+
+local Remote = ReplicatedStorage:FindFirstChild("CommandRemote")
+
+local Window = WindUI:CreateWindow({
+    Title = "Silent Hub",
+    Icon = "terminal",
+    Author = "Nigga",
+    Size = UDim2.fromOffset(650, 470),
+    Theme = "Red",
+    Resizable = true,
+})
+
+local Main = Window:Tab({
+    Title = "Main",
+    Icon = "house"
+})
+
+local Movement = Window:Tab({
+    Title = "Movement",
+    Icon = "person-standing"
+})
+
+local Visual = Window:Tab({
+    Title = "Visual",
+    Icon = "eye"
+})
+
+local Combat = Window:Tab({
+    Title = "Combat",
+    Icon = "crosshair"
+})
+
+local PlayerTab = Window:Tab({
+    Title = "Player",
+    Icon = "user"
+})
+
+local World = Window:Tab({
+    Title = "World",
+    Icon = "globe"
+})
+
+local Settings = Window:Tab({
+    Title = "Settings",
+    Icon = "settings"
+})
+
+local ESPEnabled = false
+local NameESPEnabled = false
+local DistanceESPEnabled = false
+local AimbotEnabled = false
+local NoclipEnabled = false
+local InfiniteJumpEnabled = false
+
+local AimPart = "Head"
+local AimFOV = 200
+local AimSmoothness = 0.2
+
+local OriginalFOV = Camera.FieldOfView
+local OriginalBrightness = Lighting.Brightness
+local OriginalClockTime = Lighting.ClockTime
+local OriginalFogEnd = Lighting.FogEnd
+local OriginalGravity = workspace.Gravity
+
+local function Notify(title, content)
+    WindUI:Notify({
+        Title = title,
+        Content = content,
+        Duration = 3
+    })
+end
+
+local function Character()
+    return Player.Character
+end
+
+local function Humanoid()
+    local char = Character()
+
+    if char then
+        return char:FindFirstChildOfClass("Humanoid")
+    end
+end
+
+local function Root()
+    local char = Character()
+
+    if char then
+        return char:FindFirstChild("HumanoidRootPart")
+    end
+end
+
+local function ServerCommand(command, args)
+    if not Remote then
+        Notify(
+            "Sl Hub",
+            "CommandRemote is not installed."
+        )
+
+        return
+    end
+
+    Remote:FireServer(command, args or {})
+end
+
+local function FindPlayer(text)
+    text = string.lower(text or "")
+
+    if text == "" then
+        return nil
+    end
+
+    for _, target in ipairs(Players:GetPlayers()) do
+        if string.sub(
+            string.lower(target.Name),
+            1,
+            #text
+        ) == text then
+            return target
+        end
+
+        if string.sub(
+            string.lower(target.DisplayName),
+            1,
+            #text
+        ) == text then
+            return target
+        end
+    end
+end
+
+Main:Paragraph({
+    Title = Silent Hub",
+    Desc = "Universal Utility"
+})
+
+Main:Paragraph({
+    Title = "Local Player",
+    Desc = Player.DisplayName .. " (@" .. Player.Name .. ")"
+})
+
+Main:Button({
+    Title = "Respawn",
+    Icon = "refresh-cw",
+
+    Callback = function()
+        if Remote then
+            ServerCommand("respawn", {"me"})
+        else
+            local hum = Humanoid()
+
+            if hum then
+                hum.Health = 0
+            end
+        end
+    end
+})
+
+Main:Button({
+    Title = "Reset Camera",
+
+    Callback = function()
+        local hum = Humanoid()
+
+        if hum then
+            Camera.CameraSubject = hum
+        end
+
+        Camera.FieldOfView = 70
+
+        Notify(
+            "Sl Hub",
+            "Camera reset."
+        )
+    end
+})
+
+Main:Input({
+    Title = "Command",
+    Desc = "Example: speed 50",
+    Placeholder = "Enter command...",
+
+    Callback = function(text)
+        if not text or text == "" then
+            return
+        end
+
+        if string.sub(text, 1, 1) == ";" then
+            text = string.sub(text, 2)
+        end
+
+        local args = string.split(text, " ")
+        local command = string.lower(args[1] or "")
+
+        table.remove(args, 1)
+
+        if command == "speed" then
+            local hum = Humanoid()
+
+            if hum then
+                hum.WalkSpeed = math.clamp(
+                    tonumber(args[1]) or 16,
+                    0,
+                    250
+                )
+            end
+
+        elseif command == "jump" then
+            local hum = Humanoid()
+
+            if hum then
+                hum.UseJumpPower = true
+                hum.JumpPower = math.clamp(
+                    tonumber(args[1]) or 50,
+                    0,
+                    250
+                )
+            end
+
+        elseif command == "fov" then
+            Camera.FieldOfView = math.clamp(
+                tonumber(args[1]) or 70,
+                20,
+                120
+            )
+
+        elseif command == "fullbright" then
+            Lighting.Brightness = 2
+            Lighting.ClockTime = 14
+            Lighting.FogEnd = 100000
+
+        elseif command == "goto" then
+            local target = FindPlayer(args[1])
+
+            if target and target.Character and Root() then
+                local targetRoot =
+                    target.Character:FindFirstChild(
+                        "HumanoidRootPart"
+                    )
+
+                if targetRoot then
+                    Root().CFrame =
+                        targetRoot.CFrame *
+                        CFrame.new(3, 0, 0)
+                end
+            end
+
+        elseif command == "esp" then
+            ESPEnabled = true
+
+        elseif command == "unesp" then
+            ESPEnabled = false
+
+        elseif command == "aimbot" then
+            AimbotEnabled = true
+
+        elseif command == "unaimbot" then
+            AimbotEnabled = false
+
+        else
+            ServerCommand(command, args)
+        end
+
+        Notify(
+            "SL Hub",
+            "Executed: " .. command
+        )
+    end
+})
+
+Movement:Slider({
+    Title = "WalkSpeed",
+    Step = 1,
+
+    Value = {
+        Min = 0,
+        Max = 250,
+        Default = 16
+    },
+
+    Callback = function(value)
+        local hum = Humanoid()
+
+        if hum then
+            hum.WalkSpeed = value
+        end
+    end
+})
+
+Movement:Slider({
+    Title = "Jump Power",
+    Step = 1,
+
+    Value = {
+        Min = 0,
+        Max = 250,
+        Default = 50
+    },
+
+    Callback = function(value)
+        local hum = Humanoid()
+
+        if hum then
+            hum.UseJumpPower = true
+            hum.JumpPower = value
+        end
+    end
+})
+
+Movement:Toggle({
+    Title = "Infinite Jump",
+    Desc = "Jump while already in the air",
+    Value = false,
+
+    Callback = function(value)
+        InfiniteJumpEnabled = value
+    end
+})
+
+Movement:Toggle({
+    Title = "Noclip",
+    Value = false,
+
+    Callback = function(value)
+        NoclipEnabled = value
+    end
+})
+
+Movement:Button({
+    Title = "Up 10 Studs",
+
+    Callback = function()
+        local root = Root()
+
+        if root then
+            root.CFrame *= CFrame.new(0, 10, 0)
+        end
+    end
+})
+
+Movement:Button({
+    Title = "Up 50 Studs",
+
+    Callback = function()
+        local root = Root()
+
+        if root then
+            root.CFrame *= CFrame.new(0, 50, 0)
+        end
+    end
+})
+
+Movement:Button({
+    Title = "Reset Movement",
+
+    Callback = function()
+        local hum = Humanoid()
+
+        if hum then
+            hum.WalkSpeed = 16
+            hum.UseJumpPower = true
+            hum.JumpPower = 50
+        end
+
+        NoclipEnabled = false
+        InfiniteJumpEnabled = false
+    end
+})
+
+UserInputService.JumpRequest:Connect(function()
+    if not InfiniteJumpEnabled then
+        return
+    end
+
+    local hum = Humanoid()
+
+    if hum then
+        hum:ChangeState(
+            Enum.HumanoidStateType.Jumping
+        )
+    end
+end)
+
+RunService.Stepped:Connect(function()
+    if not NoclipEnabled then
+        return
+    end
+
+    local char = Character()
+
+    if not char then
+        return
+    end
+
+    for _, object in ipairs(char:GetDescendants()) do
+        if object:IsA("BasePart") then
+            object.CanCollide = false
+        end
+    end
+end)
+
+Visual:Toggle({
+    Title = "ESP",
+    Desc = "Highlight players",
+    Value = false,
+
+    Callback = function(value)
+        ESPEnabled = value
+    end
+})
+
+Visual:Toggle({
+    Title = "Player Names",
+    Value = false,
+
+    Callback = function(value)
+        NameESPEnabled = value
+    end
+})
+
+Visual:Toggle({
+    Title = "Distance",
+    Value = false,
+
+    Callback = function(value)
+        DistanceESPEnabled = value
+    end
+})
+
+Visual:Slider({
+    Title = "Camera FOV",
+    Step = 1,
+
+    Value = {
+        Min = 30,
+        Max = 120,
+        Default = 70
+    },
+
+    Callback = function(value)
+        Camera.FieldOfView = value
+    end
+})
+
+Visual:Toggle({
+    Title = "Fullbright",
+    Value = false,
+
+    Callback = function(value)
+        if value then
+            Lighting.Brightness = 2
+            Lighting.ClockTime = 14
+            Lighting.FogEnd = 100000
+        else
+            Lighting.Brightness = OriginalBrightness
+            Lighting.ClockTime = OriginalClockTime
+            Lighting.FogEnd = OriginalFogEnd
+        end
+    end
+})
+
+local function RemoveVisuals(target)
+    if not target.Character then
+        return
+    end
+
+    local highlight =
+        target.Character:FindFirstChild("SlHighlight")
+
+    if highlight then
+        highlight:Destroy()
+    end
+
+    local head =
+        target.Character:FindFirstChild("Head")
+
+    if head then
+        local billboard =
+            head:FindFirstChild("SlInfo")
+
+        if billboard then
+            billboard:Destroy()
+        end
+    end
+end
+
+local function UpdateVisuals(target)
+    if target == Player then
+        return
+    end
+
+    local char = target.Character
+
+    if not char then
+        return
+    end
+
+    local head = char:FindFirstChild("Head")
+
+    local targetRoot =
+        char:FindFirstChild("HumanoidRootPart")
+
+    if ESPEnabled then
+        if not char:FindFirstChild("slHighlight") then
+            local highlight = Instance.new("Highlight")
+
+            highlight.Name = "SlHighlight"
+            highlight.FillTransparency = 0.8
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode =
+                Enum.HighlightDepthMode.AlwaysOnTop
+
+            highlight.Parent = char
+        end
+    else
+        local highlight =
+            char:FindFirstChild("SlHighlight")
+
+        if highlight then
+            highlight:Destroy()
+        end
+    end
+
+    if head and (NameESPEnabled or DistanceESPEnabled) then
+        local billboard =
+            head:FindFirstChild("EncryptedInfo")
+
+        if not billboard then
+            billboard = Instance.new("BillboardGui")
+            billboard.Name = "SlInfo"
+            billboard.Size = UDim2.fromOffset(200, 40)
+            billboard.StudsOffset = Vector3.new(0, 2.7, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = head
+
+            local label = Instance.new("TextLabel")
+            label.Name = "Label"
+            label.Size = UDim2.fromScale(1, 1)
+            label.BackgroundTransparency = 1
+            label.TextColor3 = Color3.new(1, 1, 1)
+            label.TextStrokeTransparency = 0
+            label.TextSize = 14
+            label.Parent = billboard
+        end
+
+        local label =
+            billboard:FindFirstChild("Label")
+
+        if label then
+            local text = ""
+
+            if NameESPEnabled then
+                text = target.DisplayName
+            end
+
+            if DistanceESPEnabled
+                and Root()
+                and targetRoot then
+
+                local distance = math.floor(
+                    (
+                        Root().Position -
+                        targetRoot.Position
+                    ).Magnitude
+                )
+
+                if text ~= "" then
+                    text ..= " | "
+                end
+
+                text ..= tostring(distance) .. " studs"
+            end
+
+            label.Text = text
+        end
+    elseif head then
+        local billboard =
+            head:FindFirstChild("EncryptedInfo")
+
+        if billboard then
+            billboard:Destroy()
+        end
+    end
+end
+
+local function GetClosestTarget()
+    local closest = nil
+    local closestDistance = AimFOV
+
+    local mouse =
+        UserInputService:GetMouseLocation()
+
+    for _, target in ipairs(Players:GetPlayers()) do
+        if target ~= Player and target.Character then
+            local hum =
+                target.Character:FindFirstChildOfClass(
+                    "Humanoid"
+                )
+
+            local part =
+                target.Character:FindFirstChild(AimPart)
+
+            if hum and hum.Health > 0 and part then
+                local position, visible =
+                    Camera:WorldToViewportPoint(
+                        part.Position
+                    )
+
+                if visible then
+                    local distance =
+                        (
+                            Vector2.new(
+                                position.X,
+                                position.Y
+                            ) - mouse
+                        ).Magnitude
+
+                    if distance < closestDistance then
+                        closestDistance = distance
+                        closest = target
+                    end
+                end
+            end
+        end
+    end
+
+    return closest
+end
+
+local function AimAt(target, instant)
+    if not target or not target.Character then
+        return
+    end
+
+    local part =
+        target.Character:FindFirstChild(AimPart)
+
+    if not part then
+        return
+    end
+
+    local goal =
+        CFrame.lookAt(
+            Camera.CFrame.Position,
+            part.Position
+        )
+
+    if instant then
+        Camera.CFrame = goal
+    else
+        Camera.CFrame =
+            Camera.CFrame:Lerp(
+                goal,
+                AimSmoothness
+            )
+    end
+end
+
+Combat:Toggle({
+    Title = "Aimbot",
+    Desc = "Aim camera toward closest target",
+    Value = false,
+
+    Callback = function(value)
+        AimbotEnabled = value
+    end
+})
+
+Combat:Button({
+    Title = "Flick",
+    Desc = "Instantly aim at closest target",
+
+    Callback = function()
+        local target = GetClosestTarget()
+
+        if target then
+            AimAt(target, true)
+
+            Notify(
+                "Silent Hub",
+                "Flick: " .. target.DisplayName
+            )
+        else
+            Notify(
+                "Silent Hub",
+                "No target found."
+            )
+        end
+    end
+})
+
+Combat:Dropdown({
+    Title = "Aim Part",
+
+    Values = {
+        "Head",
+        "Body"
+    },
+
+    Value = "Head",
+
+    Callback = function(option)
+        local selected =
+            typeof(option) == "table"
+            and option.Title
+            or option
+
+        if selected == "Body" then
+            AimPart = "HumanoidRootPart"
+        else
+            AimPart = "Head"
+        end
+    end
+})
+
+Combat:Slider({
+    Title = "Aim FOV",
+    Step = 5,
+
+    Value = {
+        Min = 25,
+        Max = 600,
+        Default = 200
+    },
+
+    Callback = function(value)
+        AimFOV = value
+    end
+})
+
+Combat:Slider({
+    Title = "Aim Smoothness",
+    Step = 1,
+
+    Value = {
+        Min = 1,
+        Max = 100,
+        Default = 20
+    },
+
+    Callback = function(value)
+        AimSmoothness = math.clamp(
+            value / 100,
+            0.01,
+            1
+        )
+    end
+})
+
+RunService.RenderStepped:Connect(function()
+    if AimbotEnabled then
+        local target = GetClosestTarget()
+
+        if target then
+            AimAt(target, false)
+        end
+    end
+
+    for _, target in ipairs(Players:GetPlayers()) do
+        UpdateVisuals(target)
+    end
+end)
+
+PlayerTab:Input({
+    Title = "Teleport To Player",
+    Placeholder = "Player name",
+
+    Callback = function(text)
+        local target = FindPlayer(text)
+
+        if target and target.Character and Root() then
+            local targetRoot =
+                target.Character:FindFirstChild(
+                    "HumanoidRootPart"
+                )
+
+            if targetRoot then
+                Root().CFrame =
+                    targetRoot.CFrame *
+                    CFrame.new(3, 0, 0)
+            end
+        end
+    end
+})
+
+PlayerTab:Button({
+    Title = "Heal",
+
+    Callback = function()
+        if Remote then
+            ServerCommand("heal", {"me"})
+        else
+            local hum = Humanoid()
+
+            if hum then
+                hum.Health = hum.MaxHealth
+            end
+        end
+    end
+})
+
+PlayerTab:Toggle({
+    Title = "ForceField",
+    Value = false,
+
+    Callback = function(value)
+        ServerCommand(
+            value and "ff" or "unff",
+            {"me"}
+        )
+    end
+})
+
+PlayerTab:Toggle({
+    Title = "Invisible",
+    Value = false,
+
+    Callback = function(value)
+        ServerCommand(
+            value and "invisible" or "visible",
+            {"me"}
+        )
+    end
+})
+
+PlayerTab:Toggle({
+    Title = "Fire Effect",
+    Value = false,
+
+    Callback = function(value)
+        ServerCommand(
+            value and "fire" or "unfire",
+            {"me"}
+        )
+    end
+})
+
+PlayerTab:Toggle({
+    Title = "Sparkles",
+    Value = false,
+
+    Callback = function(value)
+        ServerCommand(
+            value and "sparkles" or "unsparkles",
+            {"me"}
+        )
+    end
+})
+
+World:Slider({
+    Title = "Gravity",
+    Step = 1,
+
+    Value = {
+        Min = 0,
+        Max = 500,
+        Default = 196
+    },
+
+    Callback = function(value)
+        if Remote then
+            ServerCommand(
+                "gravity",
+                {tostring(value)}
+            )
+        else
+            workspace.Gravity = value
+        end
+    end
+})
+
+World:Slider({
+    Title = "Time",
+    Step = 1,
+
+    Value = {
+        Min = 0,
+        Max = 24,
+        Default = 14
+    },
+
+    Callback = function(value)
+        if Remote then
+            ServerCommand(
+                "time",
+                {tostring(value)}
+            )
+        else
+            Lighting.ClockTime = value
+        end
+    end
+})
+
+World:Button({
+    Title = "Day",
+
+    Callback = function()
+        if Remote then
+            ServerCommand("day", {})
+        else
+            Lighting.ClockTime = 14
+        end
+    end
+})
+
+World:Button({
+    Title = "Night",
+
+    Callback = function()
+        if Remote then
+            ServerCommand("night", {})
+        else
+            Lighting.ClockTime = 0
+        end
+    end
+})
+
+Settings:Button({
+    Title = "Reset Everything",
+
+    Callback = function()
+        AimbotEnabled = false
+        ESPEnabled = false
+        NameESPEnabled = false
+        DistanceESPEnabled = false
+        NoclipEnabled = false
+        InfiniteJumpEnabled = false
+
+        Camera.FieldOfView = OriginalFOV
+        Lighting.Brightness = OriginalBrightness
+        Lighting.ClockTime = OriginalClockTime
+        Lighting.FogEnd = OriginalFogEnd
+        workspace.Gravity = OriginalGravity
+
+        local hum = Humanoid()
+
+        if hum then
+            hum.WalkSpeed = 16
+            hum.UseJumpPower = true
+            hum.JumpPower = 50
+        end
+
+        for _, target in ipairs(Players:GetPlayers()) do
+            RemoveVisuals(target)
+        end
+
+        Notify(
+            "Silent Hub",
+            "Everything reset."
+        )
+    end
+})
+
+Notify(
+    "Silent Hub",
+    "Loaded successfully."
+)
