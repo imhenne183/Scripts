@@ -1,5 +1,5 @@
 --[[
-    Silence - Loader
+    Silent Hub - Loader
     by Havoc @seancode4life
        Henrik @xyzhenrik
 ]]
@@ -39,12 +39,12 @@ local function Create(className, properties, parent)
 end
 
 function KeySystem:CreateKeySystem(Config)
-    local Title = "Silence"
+    local Title = "Silent Hub Offical"
     local Description = Config.Description or "Input Key..."
     local Keys = Config.Keys or {"", "", ""}
     local MainScriptCallback = Config.MainScriptCallback or function(success) end
     local SaveKey = Config.SaveKey == true
-    local KeyFileName = Config.KeyFileName or "Silence/SilenceKey.txt"
+    local KeyFileName = Config.KeyFileName or "Silent/SilentKey.txt"
 
     local function EnsureKeyFolder()
         if type(makefolder) ~= "function" then return end
