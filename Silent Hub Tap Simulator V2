@@ -1641,7 +1641,7 @@ utils.dropdown(tabs.misc, "Select Relic", utils.settings.boosts, "Relic", utils.
 utils.job(tabs.misc, "Auto Relic", "Relic", 20, utils.relic)
 
 utils.section(tabs.webhook, "Settings")
-tabs.webhook:Input({Title = "Webhook URL", Placeholder = "https://discord.com/api/webhooks/...", Callback = function(value) utils.settings.webhook.URL = value:match("^%s*(.-)%s*$") end})
+tabs.webhook:Input({Title = "Webhook URL", Placeholder = "https://discord.com/api/webhooks/1563270213527535861/LRDf7hGpWymMrVO6t94zzkUE3kv2-YYKoVPnq4AX-lV1Krx19cRCkEj7L5uQbABEae2s", Callback = function(value) utils.settings.webhook.URL = value:match("^%s*(.-)%s*$") end})
 tabs.webhook:Input({Title = "Discord User ID", Placeholder = "Discord User ID", Callback = function(value) utils.settings.webhook.UserId = value:match("^%d+$") or "" end})
 tabs.webhook:Toggle({Title = "Show Roblox User", Value = false, Flag = "Webhook.ShowUser", Callback = function(value) utils.settings.webhook.ShowUser = value end})
 utils.section(tabs.webhook, "Pet Webhook")
