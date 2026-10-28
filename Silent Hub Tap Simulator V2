@@ -52,7 +52,7 @@ end
 
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/silencedevs/SilenceScripts/refs/heads/main/libraries/windui/windui.luau"))()
 local silence = WindUI:CreateWindow({
-    Title = "Silent Hub - Tap Simulator Reborn",
+    Title = " DAN HUB - Tap Simulator Reborn",
     Author = "by Henrik @xyzhenrik",
     Icon = "solar:moon-bold",
     IconSize = 26,
@@ -62,7 +62,7 @@ local silence = WindUI:CreateWindow({
     Size = UDim2.fromOffset(500, 500),
     Folder = "Silence/TapSimulatorReborn/" .. tostring(services.Players.LocalPlayer.UserId),
     OpenButton = {
-        Title = "Silent Hub",
+        Title = "DAN HUB",
         CornerRadius = UDim.new(1, 0),
         StrokeThickness = 3,
         Enabled = true,
@@ -1832,4 +1832,4 @@ if utils.configManager then
     for _, name in ipairs(utils.refreshConfigs()) do utils.configManager:CreateConfig(name) end
 end
 
-return utils, Silent Hub
+return utils, DAN HUB
