@@ -273,7 +273,7 @@ library = loadstring(game:HttpGet("https://raw.githubusercontent.com/mota283883/
 
 local displayName = S.LP.DisplayName or S.LP.Name
 
-R.Window = library:AddWindow("Nova Hub | Welcome Nigga " .. displayName, {
+R.Window = library:AddWindow("Syntax Hub | Welcome Nigga " .. displayName, {
     main_color = Color3.fromRGB(80, 40, 120),
     min_size = Vector2.new(560, 1230),
     can_resize = false,
@@ -290,14 +290,14 @@ R.Home:AddLabel("Script Info").TextSize = 28
 
 R.Home:AddLabel(V.ScriptName).TextSize = 25
 R.Home:AddLabel("Version: " .. V.ScriptVersion).TextSize = 25
-R.Home:AddLabel("Author: Made By Rafael and Sherya ").TextSize = 25
+R.Home:AddLabel("Author: Made By Rafael and Encrypted ").TextSize = 25
 R.Home:AddLabel("UI Library: Elerium v2").TextSize = 25
 
 R.Home:AddLabel("")
-R.Home:AddLabel("Mystery Hub Server").TextSize = 25
+R.Home:AddLabel("Syntax Hub Server").TextSize = 25
 
 R.Home:AddButton("Server Discord", function()
-    local discord = "https://discord.gg/YDYMTWZUuD"
+    local discord = "https://discord.gg/RGqzpyxHRA"
 
     if setclipboard then
         setclipboard(discord)
