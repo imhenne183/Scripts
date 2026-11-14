@@ -195,7 +195,7 @@ local lockedCFrame = nil
 local posLockConn = nil
 
 local Window = WindUI:CreateWindow({
-    Title = "SL HUB",
+    Title = "Syntax Hub",
     SubTitle = "Bone Breaker Edition",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
@@ -1129,13 +1129,13 @@ HubGroup:Space()
 
 HubGroup:Button({
     Title = "Close Hub",
-    Desc = "Close the SL HUB window.",
+    Desc = "Close the Syntax Hub window.",
     Icon = "solar:close-circle-bold",
     IconColor = Red,
     Color = Red,
     Justify = "Center",
     Callback = function()
-        notify("Hub", "Closing SL HUB.", "solar:close-circle-bold")
+        notify("Hub", "ClosingSyntax Hub.", "solar:close-circle-bold")
         task.wait(0.5)
         stopFarm()
         if posLockConn then pcall(function() posLockConn:Disconnect() end) end
@@ -1147,4 +1147,4 @@ HubGroup:Button({
 Window:SetToggleKey(Enum.KeyCode.RightShift)
 
 task.wait(1)
-notify("SL HUB Loaded", "Welcome, " .. LocalPlayer.DisplayName .. "! Bone Breaker ready.", "solar:shield-check-bold", 5)
+notify("Syntax Hub Loaded", "Welcome, " .. LocalPlayer.DisplayName .. "! Bone Breaker ready.", "solar:shield-check-bold", 5)
