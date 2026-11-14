@@ -1,6 +1,6 @@
 -- [[ IF YOU DON'T INCLUDE MY NAME IN THE CREDITS, I'LL LEAK YOUR SCRIPT ♥️ ]]
 
-local _0xK = "Syniox-X-Yusuf" 
+local _0xK = "syntax-X-Yusuf" 
 local TweenService = game:GetService("TweenService")
 
 local _0xCG = game:GetService("CoreGui")
@@ -127,9 +127,9 @@ local function CreateSynioxBtn(name, scriptURL)
 end
 
 CreateSynioxBtn("Muscle legend", " https://raw.githubusercontent.com/imhenne183/Scripts/refs/heads/main/Syntax%20Hub%20Ml")
-CreateSynioxBtn("UR SCRİPT NAME", "LINK")
-CreateSynioxBtn("Coming Soon", "LINK")
-CreateSynioxBtn("Coming Soon", "LINK")
+CreateSynioxBtn("Flick", "https://raw.githubusercontent.com/imhenne183/Scripts/refs/heads/main/Nova%20Hub%20Unversail%20Script")
+CreateSynioxBtn("Broken Bones", "https://raw.githubusercontent.com/imhenne183/Scripts/refs/heads/main/Silent%20Hub%20Broken%20bomes")
+CreateSynioxBtn("Tap Simluator Reborn", "https://raw.githubusercontent.com/imhenne183/Scripts/refs/heads/main/NovaHub%20Tap%20Simluator%20Reborn")
 
 _0xSB.MouseButton1Click:Connect(function()
     if _0xKI.Text == _0xK then
@@ -154,7 +154,7 @@ _0xSB.MouseButton1Click:Connect(function()
 end)
 
 _0xGK.MouseButton1Click:Connect(function()
-    setclipboard("UR DİSCORD SERVER LİNK")
+    setclipboard("https://discord.gg/RGqzpyxHRA")
     _0xGK.Text = "COPIED DISCORD!"
     task.wait(1.2)
     _0xGK.Text = "GET KEY"
