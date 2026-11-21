@@ -1,61 +1,403 @@
--- Load the UI library (note the lowercase 'l' in loadstring)
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+local TeleportService = game:GetService("TeleportService")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Load WindUI
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/MontaserV8/VELOIX--HUB/refs/heads/main/Wind%20Ui.lua"))()
 
--- Create the main window
+-- Global State Variables
+local Settings = {
+    WalkSpeed = 16,
+    JumpPower = 50,
+    InfiniteJump = false,
+    Noclip = false,
+    Fullbright = false,
+    FOV = 70,
+    ESPEnabled = false,
+    ESPColor = Color3.fromRGB(138, 43, 226)
+}
+
+-- Create Main Window (Dark Theme)
 local Window = WindUI:CreateWindow({
-    Title = "Script Hub",
-    Icon = "folder",
-    Author = "YourName",
-    Folder = "ScriptHubConfig",
-    Size = UDim2.fromOffset(580, 460),
+    Title = "Veloix Hub",
+    Icon = "sparkles",
+    Author = "Admin",
+    Folder = "VeloixDarkConfig",
+    Size = UDim2.fromOffset(600, 480),
     Transparent = true,
     Theme = "Dark",
+    SideBarWidth = 180,
+    Resizable = true,
+    ToggleKey = Enum.KeyCode.RightControl -- Press RightCtrl to hide/show UI
 })
 
--- Create a tab
-local MainTab = Window:Tab({
-    Title = "Main",
-    Icon = "home",
+-- Welcome Notification
+WindUI:Notify({
+    Title = "Veloix Hub Loaded",
+    Content = "Press RightControl to toggle the UI.",
+    Duration = 5,
+    Icon = "check-circle"
 })
 
--- Add a section inside the tab
-local Section = MainTab:Section({ 
-    Title = "General Controls",
+-- ==========================================
+-- TAB 1: PLAYER & MOVEMENT
+-- ==========================================
+local PlayerTab = Window:Tab({
+    Title = "Player",
+    Icon = "user",
+})
+
+local MovementSection = PlayerTab:Section({
+    Title = "Movement Modifications",
     Opened = true,
 })
 
--- Add a Button
-Section:Button({
-    Title = "Print Hello",
-    Desc = "Outputs a message to the developer console (F9)",
-    Callback = function()
-        print("Hello from WindUI!")
-    end
-})
-
--- Add a Toggle
-Section:Toggle({
-    Title = "Example Toggle",
-    Desc = "Switches between true and false",
-    Value = false,
-    Callback = function(state)
-        print("Toggle is now:", state)
-    end
-})
-
--- Add a Slider
-Section:Slider({
+MovementSection:Slider({
     Title = "WalkSpeed",
-    Desc = "Adjust character movement speed",
-    Value = {
-        Min = 16,
-        Max = 100,
-        Default = 16,
-    },
+    Desc = "Adjust your character's running speed (Default: 16)",
+    Value = { Min = 16, Max = 250, Default = 16 },
     Callback = function(value)
-        local player = game.Players.LocalPlayer
-        if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-            player.Character.Humanoid.WalkSpeed = value
+        Settings.WalkSpeed = value
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed = value
         end
     end
 })
+
+MovementSection:Slider({
+    Title = "JumpPower",
+    Desc = "Adjust your jump height (Default: 50)",
+    Value = { Min = 50, Max = 300, Default = 50 },
+    Callback = function(value)
+        Settings.JumpPower = value
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.UseJumpPower = true
+            hum.JumpPower = value
+        end
+    end
+})
+
+MovementSection:Toggle({
+    Title = "Infinite Jump",
+    Desc = "Allows jumping repeatedly in mid-air",
+    Value = false,
+    Callback = function(state)
+        Settings.InfiniteJump = state
+    end
+})
+
+MovementSection:Toggle({
+    Title = "Noclip",
+    Desc = "Walk through walls and solid objects",
+    Value = false,
+    Callback = function(state)
+        Settings.Noclip = state
+        -- Restore collision immediately when turned off
+        if not state and LocalPlayer.Character then
+            for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end
+})
+
+local TeleportSection = PlayerTab:Section({
+    Title = "Player Teleportation",
+    Opened = true,
+})
+
+-- Helper function to get player names
+local function getPlayerNames()
+    local names = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            table.insert(names, plr.Name)
+        end
+    end
+    return #names > 0 and names or { "No other players" }
+end
+
+local SelectedPlayer = nil
+local PlayerDropdown = TeleportSection:Dropdown({
+    Title = "Select Player",
+    Desc = "Choose a player to teleport to",
+    Values = getPlayerNames(),
+    Value = "",
+    Callback = function(option)
+        SelectedPlayer = option
+    end
+})
+
+TeleportSection:Button({
+    Title = "Refresh Player List",
+    Desc = "Updates the dropdown with current server players",
+    Callback = function()
+        PlayerDropdown:Refresh(getPlayerNames(), true)
+        WindUI:Notify({ Title = "Refreshed", Content = "Player list updated.", Duration = 2 })
+    end
+})
+
+TeleportSection:Button({
+    Title = "Teleport to Selected",
+    Desc = "Moves your character to the chosen player",
+    Callback = function()
+        local target = SelectedPlayer and Players:FindFirstChild(SelectedPlayer)
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                myRoot.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+            end
+        else
+            WindUI:Notify({ Title = "Error", Content = "Invalid player or character not spawned.", Duration = 3 })
+        end
+    end
+})
+
+-- ==========================================
+-- TAB 2: VISUALS & CAMERA
+-- ==========================================
+local VisualsTab = Window:Tab({
+    Title = "Visuals",
+    Icon = "eye",
+})
+
+local CameraSection = VisualsTab:Section({
+    Title = "Camera & Lighting",
+    Opened = true,
+})
+
+CameraSection:Slider({
+    Title = "Field of View (FOV)",
+    Desc = "Widen or narrow your camera view (Default: 70)",
+    Value = { Min = 30, Max = 120, Default = 70 },
+    Callback = function(value)
+        Settings.FOV = value
+        Camera.FieldOfView = value
+    end
+})
+
+local DefaultAmbient = Lighting.Ambient
+local DefaultBrightness = Lighting.Brightness
+
+CameraSection:Toggle({
+    Title = "Fullbright",
+    Desc = "Removes shadows and dark lighting across the map",
+    Value = false,
+    Callback = function(state)
+        Settings.Fullbright = state
+        if state then
+            Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+            Lighting.Brightness = 2
+            Lighting.GlobalShadows = false
+        else
+            Lighting.Ambient = DefaultAmbient
+            Lighting.Brightness = DefaultBrightness
+            Lighting.GlobalShadows = true
+        end
+    end
+})
+
+local ESPSection = VisualsTab:Section({
+    Title = "Player Highlights (ESP)",
+    Opened = true,
+})
+
+local Highlights = {}
+
+local function updateESP()
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character then
+            local existing = plr.Character:FindFirstChild("VeloixHighlight")
+            if Settings.ESPEnabled then
+                if not existing then
+                    local hl = Instance.new("Highlight")
+                    hl.Name = "VeloixHighlight"
+                    hl.FillColor = Settings.ESPColor
+                    hl.OutlineColor = Color3.new(1, 1, 1)
+                    hl.FillTransparency = 0.5
+                    hl.Parent = plr.Character
+                    Highlights[plr] = hl
+                else
+                    existing.FillColor = Settings.ESPColor
+                end
+            elseif existing then
+                existing:Destroy()
+                Highlights[plr] = nil
+            end
+        end
+    end
+end
+
+ESPSection:Toggle({
+    Title = "Enable Player Highlight",
+    Desc = "Highlights all players through walls",
+    Value = false,
+    Callback = function(state)
+        Settings.ESPEnabled = state
+        updateESP()
+    end
+})
+
+ESPSection:Colorpicker({
+    Title = "Highlight Color",
+    Desc = "Change the fill color of player highlights",
+    Default = Settings.ESPColor,
+    Callback = function(color)
+        Settings.ESPColor = color
+        updateESP()
+    end
+})
+
+-- ==========================================
+-- TAB 3: MISC & SERVER UTILITIES
+-- ==========================================
+local MiscTab = Window:Tab({
+    Title = "Misc",
+    Icon = "wrench",
+})
+
+local UtilitySection = MiscTab:Section({
+    Title = "Server & Character Utilities",
+    Opened = true,
+})
+
+UtilitySection:Input({
+    Title = "Custom Gravity",
+    Desc = "Set workspace gravity (Default: 196.2)",
+    Placeholder = "196.2",
+    Callback = function(text)
+        local num = tonumber(text)
+        if num then
+            workspace.Gravity = num
+            WindUI:Notify({ Title = "Gravity Updated", Content = "Set gravity to " .. num, Duration = 2 })
+        end
+    end
+})
+
+UtilitySection:Button({
+    Title = "Reset Character",
+    Desc = "Forces your character to respawn",
+    Callback = function()
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = 0
+        end
+    end
+})
+
+UtilitySection:Button({
+    Title = "Rejoin Server",
+    Desc = "Reconnects to the current game instance",
+    Callback = function()
+        Window:Dialog({
+            Title = "Confirm Rejoin",
+            Content = "Are you sure you want to rejoin this server?",
+            Buttons = {
+                {
+                    Title = "Rejoin",
+                    Variant = "Primary",
+                    Callback = function()
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+                    end
+                },
+                {
+                    Title = "Cancel",
+                    Variant = "Secondary",
+                    Callback = function() end
+                }
+            }
+        })
+    end
+})
+
+-- ==========================================
+-- TAB 4: UI SETTINGS
+-- ==========================================
+local SettingsTab = Window:Tab({
+    Title = "Settings",
+    Icon = "settings",
+})
+
+local UISection = SettingsTab:Section({
+    Title = "Interface Controls",
+    Opened = true,
+})
+
+UISection:Keybind({
+    Title = "UI Toggle Keybind",
+    Desc = "Change the key used to show/hide this window",
+    Value = "RightControl",
+    Callback = function(key)
+        Window.ToggleKey = Enum.KeyCode[key] or Enum.KeyCode.RightControl
+    end
+})
+
+UISection:Toggle({
+    Title = "Window Transparency",
+    Desc = "Toggle background blur/transparency",
+    Value = true,
+    Callback = function(state)
+        Window:ToggleTransparency(state)
+    end
+})
+
+-- ==========================================
+-- CORE BACKGROUND LOOPS (KEEPS FEATURES WORKING)
+-- ==========================================
+
+-- 1. Infinite Jump Listener
+UserInputService.JumpRequest:Connect(function()
+    if Settings.InfiniteJump and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end)
+
+-- 2. Noclip & Speed Persistence Loop
+RunService.Stepped:Connect(function()
+    if LocalPlayer.Character then
+        if Settings.Noclip then
+            for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
+end)
+
+-- 3. Re-apply stats on Respawn
+LocalPlayer.CharacterAdded:Connect(function(char)
+    local hum = char:WaitForChild("Humanoid", 5)
+    if hum then
+        hum.WalkSpeed = Settings.WalkSpeed
+        hum.UseJumpPower = true
+        hum.JumpPower = Settings.JumpPower
+    end
+end)
+
+-- 4. Keep ESP updated when players join/respawn
+Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        updateESP()
+    end)
+end)
+for _, plr in ipairs(Players:GetPlayers()) do
+    if plr ~= LocalPlayer then
+        plr.CharacterAdded:Connect(function()
+            task.wait(0.5)
+            updateESP()
+        end)
+    end
+end
