@@ -1,0 +1,61 @@
+-- Load the UI library (note the lowercase 'l' in loadstring)
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/MontaserV8/VELOIX--HUB/refs/heads/main/Wind%20Ui.lua"))()
+
+-- Create the main window
+local Window = WindUI:CreateWindow({
+    Title = "Script Hub",
+    Icon = "folder",
+    Author = "YourName",
+    Folder = "ScriptHubConfig",
+    Size = UDim2.fromOffset(580, 460),
+    Transparent = true,
+    Theme = "Dark",
+})
+
+-- Create a tab
+local MainTab = Window:Tab({
+    Title = "Main",
+    Icon = "home",
+})
+
+-- Add a section inside the tab
+local Section = MainTab:Section({ 
+    Title = "General Controls",
+    Opened = true,
+})
+
+-- Add a Button
+Section:Button({
+    Title = "Print Hello",
+    Desc = "Outputs a message to the developer console (F9)",
+    Callback = function()
+        print("Hello from WindUI!")
+    end
+})
+
+-- Add a Toggle
+Section:Toggle({
+    Title = "Example Toggle",
+    Desc = "Switches between true and false",
+    Value = false,
+    Callback = function(state)
+        print("Toggle is now:", state)
+    end
+})
+
+-- Add a Slider
+Section:Slider({
+    Title = "WalkSpeed",
+    Desc = "Adjust character movement speed",
+    Value = {
+        Min = 16,
+        Max = 100,
+        Default = 16,
+    },
+    Callback = function(value)
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = value
+        end
+    end
+})
